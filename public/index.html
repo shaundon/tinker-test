@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <meta charset="UTF-8">
+    <title>Luminance</title>
+    <script>
+        var socket = io();
+        document.addEventListener("DOMContentLoaded", function(event) {
+
+            socket.on('event', function(message) {
+                addMessage(message);
+            });
+
+            socket.on('connect', function() {
+                addMessage('Connected.', 'status');
+            });
+
+            socket.on('disconnect', function() {
+                addMessage('Disconnected.', 'status');
+            });
+        });
+
+        function addMessage(message, className) {
+            if (className) {
+                document.querySelector('#output').innerHTML += "<p class='" + className + "'>" + message + "</p>";
+            }
+            else {
+                document.querySelector('#output').innerHTML += "<p>" + message + "</p>";
+            }
+        }
+    </script>
+    <style>
+        .status {
+            color: #93a;
+        }
+        html {
+            background: #5abe57;
+            color: #f6f6f6;
+            font-family: Helvetica, Arial, san-serif;
+            width: 50%;
+            margin: 50px auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="output"></div>
+</body>
+</html>
