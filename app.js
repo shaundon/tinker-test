@@ -17,14 +17,14 @@ http.listen(3000, function() {
 var HOST = 'localhost';
 var PORT = 4223;
 var UID = {
-    LIGHT: 'mbL',
-    LCD: 'qzP',
-    MULTITOUCH: 'pdL'
+    LIGHT: 'm4P',
+    LCD: 'qAc',
+    MULTITOUCH: 'p9S'
 };
 
 var ipcon = new Tinkerforge.IPConnection(); // Create IP connection
 var al = new Tinkerforge.BrickletAmbientLight(UID.LIGHT, ipcon); // Create device object
-var lcd = new Tinkerforge.BrickletLCD20x4(UID.LCD, ipcon);
+//var lcd = new Tinkerforge.BrickletLCD20x4(UID.LCD, ipcon);
 var multitouch = new Tinkerforge.BrickletMultiTouch(UID.MULTITOUCH, ipcon);
 
 ipcon.connect(HOST, PORT,
@@ -42,27 +42,25 @@ ipcon.on(Tinkerforge.IPConnection.CALLBACK_CONNECTED,
         al.setIlluminanceCallbackPeriod(1000);
 
         // Turn on the light.
-        lcd.backlightOn();
+        //lcd.backlightOn();
 
         multitouch.on(Tinkerforge.BrickletMultiTouch.CALLBACK_TOUCH_STATE,
             function(touchState) {
+                var touched = [];
                 var s = '';
                 if (touchState & (1 << 12)) {
-                    s += 'In proximity, ';
                 }
                 if((touchState & 0xFFF) === 0) {
-                    s += 'No electrodes touched\n';
                 }
                 else {
                     s += 'Electrodes ';
                     for(var i=0; i<12; i++) {
                         if(touchState & (1 << i)) {
-                            s += parseInt(i) + ' ';
+                            touched.push(parseInt(i));
                         }
                     }
-                    s += 'touched\n';
                 }
-                io.emit('event', s);
+                io.emit('touch', touched);
             });
     }
 );
@@ -71,8 +69,8 @@ ipcon.on(Tinkerforge.IPConnection.CALLBACK_CONNECTED,
 al.on(Tinkerforge.BrickletAmbientLight.CALLBACK_ILLUMINANCE,
     // Callback function for illuminance callback (parameter has unit Lux/10)
     function(illuminance) {
-        var output =  +illuminance/10 + ' Lux';
-        lcd.writeLine(0, 0, output);
-        io.emit('event', output);
+        var output =  +illuminance/10;
+       // lcd.writeLine(0, 0, output);
+        io.emit('luminance', output.toString());
     }
 );
